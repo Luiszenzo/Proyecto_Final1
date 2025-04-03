@@ -6,9 +6,11 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+const serviceAccount = require(process.env.SERVICE_ACCOUNT_KEY_PATH);
+
 // Initialize Firebase
 admin.initializeApp({
-    credential: admin.credential.cert(require('./serviceAccountKey.json'))
+    credential: admin.credential.cert(serviceAccount)
 });
 const db = admin.firestore();
 
