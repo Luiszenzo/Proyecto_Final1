@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('password').value;
         
         try {
-            const response = await fetch('http://localhost:3001/login', {
+            const response = await fetch('http://localhost:3002/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -33,33 +33,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 loginForm.classList.add('hidden');
                 mfaContainer.classList.remove('hidden');
                 
-                // If we have a direct code or preview URL (for development)
-                if (data.mfaCode || data.emailPreviewUrl) {
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'mfa-code';
-                    
-                    if (data.mfaCode) {
-                        infoDiv.innerHTML += `
-                            <h3>Código de verificación (solo para pruebas):</h3>
-                            <div class="code">${data.mfaCode}</div>
-                        `;
-                    }
-                    
-                    if (data.emailPreviewUrl) {
-                        infoDiv.innerHTML += `
-                            <p>Ver el correo en: <a href="${data.emailPreviewUrl}" target="_blank">Ethereal Email</a></p>
-                        `;
-                    }
-                    
-                    // Insert before the input field
-                    const mfaInput = document.getElementById('mfaCode');
-                    mfaInput.parentNode.insertBefore(infoDiv, mfaInput);
-                    
-                    // Auto-fill for testing
-                    if (data.mfaCode) {
-                        document.getElementById('mfaCode').value = data.mfaCode;
-                    }
+                // Add QR code display or email option
+                const mfaOptionsDiv = document.createElement('div');
+                mfaOptionsDiv.className = 'mfa-options';
+                
+                // Generate QR code URL if we have the secret
+                if (mfaSecret) {
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/YourApp?secret=${mfaSecret}`;
+                    mfaOptionsDiv.innerHTML += `
+                        <div class="qr-section">
+                            <h3>Escanear código QR:</h3>
+                            <img src="${qrUrl}" alt="MFA QR Code" class="qr-code">
+                            <p>Usa tu aplicación de autenticación para escanear este código</p>
+                        </div>
+                    `;
                 }
+                
+                if (data.emailSent) {
+                    mfaOptionsDiv.innerHTML += `
+                        <div class="email-section">
+                            <h3>Se ha enviado un código a tu correo electrónico</h3>
+                            <p>Por favor revisa tu bandeja de entrada.</p>
+                        </div>
+                    `;
+                }
+                
+                // Insert before the input field
+                const mfaInput = document.getElementById('mfaCode');
+                mfaInput.parentNode.insertBefore(mfaOptionsDiv, mfaInput);
                 
                 showMessage(data.message, 'success');
             } else {
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const response = await fetch('http://localhost:3001/verify-mfa', {
+            const response = await fetch('http://localhost:3002/verify-mfa', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

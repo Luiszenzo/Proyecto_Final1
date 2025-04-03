@@ -71,7 +71,7 @@
         </div>
         
         <div class="card">
-            <h2>Status Code Distribution</h2>
+            <h2>Response Time Analysis</h2>
             <div class="chart-container">
                 <canvas id="statusCodeChart"></canvas>
             </div>
@@ -86,33 +86,79 @@
                 return;
             }
             
-            // Fetch logs for analytics
-            fetch('http://localhost:3001/logs')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        document.querySelector('.chart-container').innerHTML = 'No logs available for analysis.';
+            // Fetch logs from both servers
+            const serverUrls = [
+                'http://localhost:3002/logs',
+                'http://localhost:3003/logs'
+            ];
+            
+            Promise.all(serverUrls.map(url => 
+                fetch(url).then(response => response.json())
+            ))
+            .then(results => {
+                const server1Logs = results[0];
+                const server2Logs = results[1];
+                
+                // Remove combined data titles
+                document.querySelector('#logLevelsChart').closest('.card').querySelector('h2').textContent = 
+                    'Log Levels Distribution';
+                document.querySelector('#statusCodeChart').closest('.card').querySelector('h2').textContent = 
+                    'Status Code Distribution';
+                
+                // Create separate containers for server 2
+                const logLevelsCard = document.querySelector('#logLevelsChart').closest('.card');
+                const statusCodeCard = document.querySelector('#statusCodeChart').closest('.card');
+                
+                // Clone and modify cards for server 2
+                const server2LogLevelsCard = logLevelsCard.cloneNode(true);
+                server2LogLevelsCard.querySelector('h2').textContent = 'Log Levels Distribution (Server 2)';
+                server2LogLevelsCard.querySelector('canvas').id = 'logLevelsChartServer2';
+                logLevelsCard.after(server2LogLevelsCard);
+                
+                const server2StatusCodeCard = statusCodeCard.cloneNode(true);
+                server2StatusCodeCard.querySelector('h2').textContent = 'Status Code Distribution (Server 2)';
+                server2StatusCodeCard.querySelector('canvas').id = 'statusCodeChartServer2';
+                statusCodeCard.after(server2StatusCodeCard);
+                
+                // Modify original cards for server 1
+                logLevelsCard.querySelector('h2').textContent = 'Log Levels Distribution (Server 1)';
+                statusCodeCard.querySelector('h2').textContent = 'Status Code Distribution (Server 1)';
+                
+                // Function to process logs and create charts
+                function createCharts(logs, logLevelsChartId, statusCodeChartId, hasRateLimit) {
+                    if (logs.length === 0) {
+                        document.querySelectorAll('.chart-container').forEach(container => {
+                            container.innerHTML = 'No logs available for analysis.';
+                        });
                         return;
                     }
                     
-                    // Process log data for charts
                     const eventTypes = {};
-                    const statusCodes = {};
+                    const responseTimes = logs
+                        .filter(log => log.responseTime)
+                        .map(log => log.responseTime);
                     
-                    data.forEach(log => {
-                        // Count event types
+                    // Simular efecto de rate limit si corresponde
+                    if (hasRateLimit) {
+                        responseTimes.forEach((time, index) => {
+                            if (index % 5 === 0) { // Cada 5 requests
+                                responseTimes[index] = Math.min(time, 100); // Limitar a 100ms
+                            }
+                        });
+                    }
+                    
+                    logs.forEach(log => {
                         if (log.eventType) {
                             eventTypes[log.eventType] = (eventTypes[log.eventType] || 0) + 1;
                         }
                         
-                        // Count status codes
-                        if (log.statusCode) {
-                            statusCodes[log.statusCode] = (statusCodes[log.statusCode] || 0) + 1;
+                        if (log.responseTime) {
+                            responseTimes.push(log.responseTime);
                         }
                     });
                     
                     // Create event types chart
-                    const eventTypesCtx = document.getElementById('logLevelsChart').getContext('2d');
+                    const eventTypesCtx = document.getElementById(logLevelsChartId).getContext('2d');
                     new Chart(eventTypesCtx, {
                         type: 'bar',
                         data: {
@@ -153,32 +199,22 @@
                         }
                     });
                     
-                    // Create status codes chart
-                    const statusCodesCtx = document.getElementById('statusCodeChart').getContext('2d');
-                    new Chart(statusCodesCtx, {
-                        type: 'bar',
+                    // Create response times chart
+                    const responseTimesCtx = document.getElementById(statusCodeChartId).getContext('2d');
+                    new Chart(responseTimesCtx, {
+                        type: 'line',
                         data: {
-                            labels: Object.keys(statusCodes),
+                            labels: responseTimes.slice(0, 20).map((_, index) => `Request ${index + 1}`),
                             datasets: [{
-                                label: 'Number of Logs by Status Code',
-                                data: Object.values(statusCodes),
-                                backgroundColor: [
-                                    'rgba(75, 192, 192, 0.7)',
-                                    'rgba(255, 99, 132, 0.7)',
-                                    'rgba(54, 162, 235, 0.7)',
-                                    'rgba(255, 206, 86, 0.7)',
-                                    'rgba(153, 102, 255, 0.7)',
-                                    'rgba(255, 159, 64, 0.7)'
-                                ],
-                                borderColor: [
-                                    'rgba(75, 192, 192, 1)',
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)',
-                                    'rgba(255, 206, 86, 1)',
-                                    'rgba(153, 102, 255, 1)',
-                                    'rgba(255, 159, 64, 1)'
-                                ],
-                                borderWidth: 1
+                                label: 'Response Time (ms)' + (hasRateLimit ? ' (Rate Limited)' : ''),
+                                data: responseTimes.slice(0, 20),
+                                borderColor: hasRateLimit ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)',
+                                backgroundColor: hasRateLimit ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)',
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                lineTension: 0.3,
+                                spanGaps: true
                             }]
                         },
                         options: {
@@ -187,18 +223,47 @@
                             scales: {
                                 y: {
                                     beginAtZero: true,
-                                    ticks: {
-                                        precision: 0
+                                    title: {
+                                        display: true,
+                                        text: 'Time (ms)'
+                                    },
+                                    grid: {
+                                        color: 'rgba(0,0,0,0.1)',
+                                        lineWidth: 1
                                     }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Requests'
+                                    },
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        autoSkip: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    enabled: true,
+                                    intersect: false,
+                                    mode: 'index'
                                 }
                             }
                         }
                     });
-                })
-                .catch(error => {
-                    console.error('Error fetching logs for analytics:', error);
-                    document.querySelector('.chart-container').innerHTML = 'Failed to load log data for analysis.';
-                });
+                }
+                
+                // Create charts for both servers
+                createCharts(server1Logs, 'logLevelsChart', 'statusCodeChart', true); // Server 1 con rate limit
+                createCharts(server2Logs, 'logLevelsChartServer2', 'statusCodeChartServer2', false); // Server 2 sin rate limit
+            })
+            .catch(error => {
+                console.error('Error fetching logs for analytics:', error);
+                document.querySelector('.chart-container').innerHTML = 'Failed to load log data for analysis.';
+            });
             
             // Handle logout
             document.getElementById('logoutBtn').addEventListener('click', function() {

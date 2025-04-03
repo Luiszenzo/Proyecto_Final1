@@ -36,7 +36,7 @@ async function logEvent(eventType, details, req, res, statusCode) {
         params: req.params,
         body: req.body,
         statusCode: statusCode,
-        responseTime: Date.now() - req.startTime, // Cambiar de string a número
+        responseTime: `${Date.now() - req.startTime}ms`,
         ip: req.ip || 'unknown',
         userAgent: req.get('User-Agent') || 'unknown',
         protocol: req.protocol,
@@ -203,7 +203,7 @@ function validateEmail(email) {
     return re.test(String(email).toLowerCase());
 }
 
-// Add rate limiter configuration
+// Elimina la configuración del rate limiter y su aplicación
 const limiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
@@ -216,12 +216,12 @@ const limiter = rateLimit({
     }
 });
 
-// Apply to specific routes
+// Elimina estas líneas
 app.use('/login', limiter);
 app.use('/register', limiter);
 app.use('/verify-mfa', limiter);
 
-const PORT = 3002;
+const PORT = 3003; // Cambia el puerto
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

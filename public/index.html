@@ -44,6 +44,18 @@
         .nav-link:hover {
             background-color: #0056b3;
         }
+        .project-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .project-info p {
+            margin: 8px 0;
+            color: #495057;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +73,11 @@
         <div class="card">
             <h2>System Information</h2>
             <div id="systemInfo">Loading...</div>
+            <div class="project-info">
+                <p><strong>Desarrollador:</strong> TSU en Desarrollo de software multiplataforma Luis Antoni Sanchez Garcia</p>
+                <p><strong>Docente:</strong> M.C.C Emmanuel Martínez Hernández</p>
+                <p><strong>Descripción:</strong> Esta aplicación es un sistema de monitoreo y análisis de logs que permite visualizar y analizar los registros de dos servidores en tiempo real. Proporciona gráficos interactivos para el análisis de tiempos de respuesta, distribución de códigos de estado y tipos de eventos.</p>
+            </div>
         </div>
         
         <div class="card">
@@ -78,7 +95,7 @@
             }
             
             // Fetch system info
-            fetch('http://localhost:3001/getInfo')
+            fetch('http://localhost:3002/getInfo')
                 .then(response => response.json())
                 .then(data => {
                     const infoDiv = document.getElementById('systemInfo');
@@ -94,7 +111,7 @@
                 });
             
             // Fetch logs
-            fetch('http://localhost:3001/logs')
+            fetch('http://localhost:3002/logs')
                 .then(response => response.json())
                 .then(data => {
                     const logsDiv = document.getElementById('logs');
