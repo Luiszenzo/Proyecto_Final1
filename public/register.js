@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('password').value;
         
         try {
-            const response = await fetch('http://localhost:3002/register', {
+            // Updated API URL to use the deployed Render URL
+            const response = await fetch('https://proyecto-final1-rkc0.onrender.com/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

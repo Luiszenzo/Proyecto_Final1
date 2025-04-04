@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('password').value;
         
         try {
-            const response = await fetch('http://localhost:3002/login', {
+            // Updated API URL to use the deployed Render URL
+            const response = await fetch('https://proyecto-final1-rkc0.onrender.com/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -81,7 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const response = await fetch('http://localhost:3002/verify-mfa', {
+            // Updated API URL to use the deployed Render URL
+            const response = await fetch('https://proyecto-final1-rkc0.onrender.com/verify-mfa', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

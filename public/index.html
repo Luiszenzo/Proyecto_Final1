@@ -94,8 +94,8 @@
                 return;
             }
             
-            // Fetch system info
-            fetch('http://localhost:3002/getInfo')
+            // Fetch system info - Updated URL to use Render deployment
+            fetch('https://proyecto-final1-rkc0.onrender.com/getInfo')
                 .then(response => response.json())
                 .then(data => {
                     const infoDiv = document.getElementById('systemInfo');
@@ -110,8 +110,8 @@
                     document.getElementById('systemInfo').textContent = 'Failed to load system information.';
                 });
             
-            // Fetch logs
-            fetch('http://localhost:3002/logs')
+            // Fetch logs - Updated URL to use Render deployment
+            fetch('https://proyecto-final1-rkc0.onrender.com/logs')
                 .then(response => response.json())
                 .then(data => {
                     const logsDiv = document.getElementById('logs');

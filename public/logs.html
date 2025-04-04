@@ -86,10 +86,10 @@
                 return;
             }
             
-            // Fetch logs from both servers
+            // Fetch logs from both servers - Updated URLs to use Render deployments
             const serverUrls = [
-                'http://localhost:3002/logs',
-                'http://localhost:3003/logs'
+                'https://proyecto-final1-rkc0.onrender.com/logs',
+                'https://back1-xa2a.onrender.com/logs'
             ];
             
             Promise.all(serverUrls.map(url => 
