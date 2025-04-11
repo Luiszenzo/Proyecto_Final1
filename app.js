@@ -287,6 +287,7 @@ app.post('/request-password-reset', async (req, res) => {
     res.json({
         resetToken,
         mfaCode,
+        mfaSecret: user.mfaSecret, // Asegúrate de incluir el secreto
         message: 'Se ha enviado un código de verificación a tu aplicación de autenticación'
     });
 });

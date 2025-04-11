@@ -187,12 +187,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     existingQr.remove();
                 }
                 
-                // Add QR code display
+                // Add QR code display - USAMOS EL SECRETO (mfaSecret) EN LUGAR DEL CÓDIGO (mfaCode)
                 const qrSection = document.createElement('div');
                 qrSection.className = 'recovery-qr-section';
                 qrSection.innerHTML = `
                     <h3>Escanear código QR:</h3>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/PasswordReset?secret=${data.mfaCode}" 
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/PasswordReset?secret=${data.mfaSecret}" 
                          alt="MFA QR Code" class="recovery-qr-code">
                     <p>Usa tu aplicación de autenticación para escanear este código</p>
                     
