@@ -256,3 +256,82 @@ app.get('/logs', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch logs' });
     }
 });
+
+// POST /request-password-reset
+app.post('/request-password-reset', async (req, res) => {
+    const { username } = req.body;
+    
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        await logEvent('PASSWORD_RESET_REQUEST_ERROR', {
+            error: 'User not found',
+            username
+        }, req, res, 404);
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate reset token (expires in 15 minutes)
+    const resetToken = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
+    
+    // Generate MFA code
+    const mfaCode = speakeasy.totp({
+        secret: user.mfaSecret,
+        encoding: 'base32'
+    });
+
+    await logEvent('PASSWORD_RESET_REQUESTED', {
+        userId: username,
+        ip: req.ip
+    }, req, res, 200);
+
+    res.json({
+        resetToken,
+        mfaCode,
+        message: 'Se ha enviado un código de verificación a tu aplicación de autenticación'
+    });
+});
+
+// POST /reset-password
+app.post('/reset-password', async (req, res) => {
+    const { resetToken, mfaCode, newPassword } = req.body;
+    
+    try {
+        const decoded = jwt.verify(resetToken, SECRET_KEY);
+        const user = users.find(u => u.username === decoded.username);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Verify MFA code
+        const verified = speakeasy.totp.verify({
+            secret: user.mfaSecret,
+            encoding: 'base32',
+            token: mfaCode
+        });
+
+        if (!verified) {
+            await logEvent('PASSWORD_RESET_MFA_FAILED', {
+                userId: decoded.username,
+                ip: req.ip
+            }, req, res, 401);
+            return res.status(401).json({ error: 'Código MFA inválido' });
+        }
+
+        // Update password
+        user.password = newPassword;
+
+        await logEvent('PASSWORD_RESET_SUCCESS', {
+            userId: decoded.username,
+            ip: req.ip
+        }, req, res, 200);
+
+        res.json({ message: 'Contraseña actualizada exitosamente' });
+    } catch (err) {
+        await logEvent('PASSWORD_RESET_ERROR', {
+            error: err.message,
+            ip: req.ip
+        }, req, res, 400);
+        res.status(400).json({ error: 'Token inválido o expirado' });
+    }
+});
