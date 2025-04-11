@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showMessage('Please enter your username', 'error');
             return;
         }
-
+    
         try {
             const response = await fetch('https://proyecto-final1-rkc0.onrender.com/request-password-reset', {
                 method: 'POST',
@@ -178,7 +178,32 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (response.ok) {
                 resetToken = data.resetToken;
-                document.getElementById('recoveryMfaContainer').classList.remove('hidden');
+                const mfaContainer = document.getElementById('recoveryMfaContainer');
+                mfaContainer.classList.remove('hidden');
+                
+                // Clear previous QR code if any
+                const existingQr = document.querySelector('.recovery-qr-section');
+                if (existingQr) {
+                    existingQr.remove();
+                }
+                
+                // Add QR code display
+                const qrSection = document.createElement('div');
+                qrSection.className = 'recovery-qr-section';
+                qrSection.innerHTML = `
+                    <h3>Escanear código QR:</h3>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/PasswordReset?secret=${data.mfaCode}" 
+                         alt="MFA QR Code" class="recovery-qr-code">
+                    <p>Usa tu aplicación de autenticación para escanear este código</p>
+                    
+                    <div class="recovery-mfa-code">
+                        <h3>O ingresa manualmente:</h3>
+                        <div class="code">${data.mfaCode}</div>
+                        <p>Este código es válido por 30 segundos</p>
+                    </div>
+                `;
+                
+                mfaContainer.insertBefore(qrSection, mfaContainer.firstChild);
                 showMessage(data.message, 'success');
             } else {
                 showMessage(data.error, 'error');
