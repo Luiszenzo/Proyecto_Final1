@@ -270,7 +270,7 @@ app.post('/request-password-reset', async (req, res) => {
         return res.status(404).json({ error: 'User not found' });
     }
 
-    // Generate reset token (expires in 15 minutes)
+    // Generate reset token
     const resetToken = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
     
     // Generate MFA code
@@ -287,8 +287,8 @@ app.post('/request-password-reset', async (req, res) => {
     res.json({
         resetToken,
         mfaCode,
-        mfaSecret: user.mfaSecret, // Asegúrate de incluir el secreto
-        message: 'Se ha enviado un código de verificación a tu aplicación de autenticación'
+        mfaSecret: user.mfaSecret, // Asegúrate de enviar el secreto
+        message: 'Escanea el código QR con Google Authenticator'
     });
 });
 

@@ -207,6 +207,7 @@ input:focus {
 .email-section {
     text-align: center;
     margin-bottom: 20px;
+}  /* Esta llave faltaba */
 
 #recoveryForm {
     margin-top: 20px;
