@@ -89,7 +89,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('authToken');
-            if (!token) {
+            const isVerified = localStorage.getItem('isVerified');
+            
+            if (!token || !isVerified) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('isVerified');
                 window.location.href = 'login.html';
                 return;
             }
