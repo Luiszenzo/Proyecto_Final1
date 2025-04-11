@@ -106,9 +106,20 @@ input:focus {
     border: 1px solid #f5c6cb;
 }
 
+/* Add these to your existing styles */
+.secondary {
+    background-color: #6c757d;
+}
+
+.secondary:hover {
+    background-color: #5a6268;
+}
+
 .hidden {
     display: none;
 }
+
+/* Add any additional styling you need for the recovery form */
 
 #mfaContainer {
     margin-top: 20px;
@@ -196,4 +207,3 @@ input:focus {
 .email-section {
     text-align: center;
     margin-bottom: 20px;
-}
