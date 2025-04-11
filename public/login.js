@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     existingQr.remove();
                 }
                 
-                // Add QR code display - Formato mejorado para Google Authenticator
+                // Solo mostramos el QR, sin el código numérico
                 const qrSection = document.createElement('div');
                 qrSection.className = 'recovery-qr-section';
                 qrSection.innerHTML = `
@@ -195,12 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/PasswordReset:${encodeURIComponent(username)}?secret=${data.mfaSecret}&issuer=TuAplicación&algorithm=SHA1&digits=6&period=30" 
                          alt="MFA QR Code" class="recovery-qr-code">
                     <p>Usa Google Authenticator para escanear este código</p>
-                    
-                    <div class="recovery-mfa-code">
-                        <h3>O ingresa manualmente:</h3>
-                        <div class="code">${data.mfaCode}</div>
-                        <p>Este código es válido por 30 segundos</p>
-                    </div>
+                    <p>El código generado será válido por 30 segundos</p>
                 `;
                 
                 mfaContainer.insertBefore(qrSection, mfaContainer.firstChild);

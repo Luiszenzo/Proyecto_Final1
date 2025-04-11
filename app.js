@@ -273,7 +273,7 @@ app.post('/request-password-reset', async (req, res) => {
     // Generate reset token
     const resetToken = jwt.sign({ username }, SECRET_KEY, { expiresIn: '15m' });
     
-    // Generate MFA code
+    // Generate MFA code (no lo devolveremos al frontend)
     const mfaCode = speakeasy.totp({
         secret: user.mfaSecret,
         encoding: 'base32'
@@ -286,8 +286,7 @@ app.post('/request-password-reset', async (req, res) => {
 
     res.json({
         resetToken,
-        mfaCode,
-        mfaSecret: user.mfaSecret, // Asegúrate de enviar el secreto
+        mfaSecret: user.mfaSecret, // Solo enviamos el secreto para el QR
         message: 'Escanea el código QR con Google Authenticator'
     });
 });
