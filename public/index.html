@@ -59,6 +59,14 @@
     </style>
 </head>
 <body>
+    <script>
+        // Add this check at the very beginning of the body
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
     <div class="dashboard">
         <div class="header">
             <h1>Welcome to the Dashboard</h1>
@@ -88,12 +96,7 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-            
+            // This check can now be removed since we have it at the top
             // Fetch system info - Updated URL to use Render deployment
             fetch('https://proyecto-final1-rkc0.onrender.com/getInfo')
                 .then(response => response.json())
